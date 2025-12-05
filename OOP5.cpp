@@ -2,6 +2,7 @@
 #include <format>
 #include <iostream>
 #include <iomanip>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -228,6 +229,28 @@ Animal& function6() {
     Animal* animal_ptr{ new Animal };
     return *animal_ptr;
 };
+
+void function7(std::unique_ptr<Animal> animal_unq_ptr) {}
+
+void function8(std::unique_ptr<Animal>& animal_unq_ptr) {}
+
+std::unique_ptr<Animal> function9() {
+    std::unique_ptr<Animal> animal_unq_ptr1{ std::make_unique<Animal>() };
+    return animal_unq_ptr1;
+}
+
+void function10(std::shared_ptr<Animal> animal_shr_ptr_) {
+    std::cout << "Shared count: " << animal_shr_ptr_.use_count() << "\n";
+}
+
+void function11(std::shared_ptr<Animal>& animal_shr_ptr_) {
+    std::cout << "Shared count: " << animal_shr_ptr_.use_count() << "\n";
+}
+
+std::shared_ptr<Animal> function12() {
+    std::shared_ptr<Animal> animal_shr_ptr_{ std::make_shared<Animal>() };
+    return animal_shr_ptr_;
+}
 
 int main()
 {
@@ -472,9 +495,78 @@ int main()
     }
     std::cout << "----------\n";
     {   
-        // Создается копия внутреннего объекта
+        // Создается копия внутреннего объекта. Внутренний объект невозможно
+        // уничтожить
         Animal animal4{ function4() };
         std::cout << "Outside function4\n";
     }
+    std::cout << "----------\n";
+    {
+        // Все нормально
+        Animal* animal5{ function5() };
+        std::cout << "Outside function5\n";
+        delete animal5;
+    }
+    std::cout << "----------\n";
+    {   
+        // Создается копия внутреннего объекта. Внутренний объект невозможно
+        // уничтожить
+        Animal animal6{ function6()};
+        std::cout << "Outside function6\n";
+    }
     std::cout << "\n";
+
+    /* Тестирование unique_ptr */
+    // unique_ptr берет на себя всю ответственность за жизнь объекта,
+    // никакой другой указатель не может указывать на этот объект,
+    // но ответственность может быть передана (без копирования).
+    // unique_ptr автоматически удаляет объект, когда выходит за "}"
+    std::cout << ">> Testing unique_ptr\n";
+    {
+        std::unique_ptr<Animal> animal_unq_ptr{ std::make_unique<Animal>() };
+        // Невозможно передать в функцию по значению (попытка сделать копию)
+        //function7(animal_unq_ptr);
+        
+        // Возможно передать по ссылке
+        function8(animal_unq_ptr);
+    }
+    std::cout << "----------\n";
+    {
+        // Возвращаем unique_ptr из функции. Все нормально
+        std::unique_ptr<Animal> animal_unq_ptr1{ function9() };
+    }
+    std::cout << "\n";
+
+    /* Тестирование shared_ptr */
+    // shared_ptr отслеживает, сколько указателей указывают на наш объект.
+    // При кол-ве указателей == 0 удаляет объект
+    std::cout << ">> Testing shared_ptr\n";
+    {
+        std::shared_ptr<Animal> animal_shr_ptr1{ std::make_shared<Animal>() };
+        std::shared_ptr<Animal> animal_shr_ptr2{ animal_shr_ptr1 };
+        // Вывод кол-ва указателей на объект
+        std::cout << "Shared count: " << animal_shr_ptr2.use_count() << "\n";
+    }
+    std::cout << "----------\n";
+    // Передача в функцию
+    {   
+        // Создает копию shared_ptr
+        std::shared_ptr<Animal> animal_shr_ptr3{ std::make_shared<Animal>() };
+        function10(animal_shr_ptr3);
+        std::cout << "Shared count: " << animal_shr_ptr3.use_count() << "\n";
+    }
+    std::cout << "----------\n";
+    {
+        // Передача по ссылке. Копии не создается
+        std::shared_ptr<Animal> animal_shr_ptr4{ std::make_shared<Animal>() };
+        function11(animal_shr_ptr4);
+        std::cout << "Shared count: " << animal_shr_ptr4.use_count() << "\n";
+    }
+    std::cout << "----------\n";
+    // Возврат shared_ptr из функции
+    {
+        // Функция вернет нормально, без копий
+        std::shared_ptr<Animal> animal_shr_ptr5{ function12() };
+        std::cout << "Shared count: " << animal_shr_ptr5.use_count() << "\n";
+    }
 }
