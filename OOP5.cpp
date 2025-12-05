@@ -1,3 +1,4 @@
+// TODO: Check everything before submitting
 #include <format>
 #include <iostream>
 #include <iomanip>
@@ -191,31 +192,39 @@ void func3(Animal& animal) {
 }
 
 Animal function1() {
+    std::cout << "Inside function1\n";
     Animal animal;
     return animal;
 };
 
 Animal* function2() {
-    Animal* animal_ptr;
+    std::cout << "Inside function2\n";
+    Animal animal;
+    Animal* animal_ptr{ &animal };
     return animal_ptr;
 };
 
 Animal& function3() {
+    std::cout << "Inside function3\n";
     Animal animal;
     return animal;
 };
 
 Animal function4() {
+    std::cout << "Inside function4\n";
     Animal* animal_ptr{ new Animal };
+    std::cout << "Before return\n";
     return *animal_ptr;
 };
 
 Animal* function5() {
+    std::cout << "Inside function5\n";
     Animal* animal_ptr{ new Animal };
     return animal_ptr;
 };
 
 Animal& function6() {
+    std::cout << "Inside function6\n";
     Animal* animal_ptr{ new Animal };
     return *animal_ptr;
 };
@@ -247,16 +256,20 @@ int main()
     этом же классе как невиртуальный, у класса-потомка метод2
     переопределен. Вызовется метод2 базового класса */
     std::cout << ">> Testing calling methods no virtual\n";
-    Derived1 derived1;
-    derived1.method1();
+    {
+        Derived1 derived1;
+        derived1.method1();
+    }
     std::cout << "\n";
 
     /* В методе1 базового класса вызывается метод2, который определен в
     этом же классе как виртуальный, у класса-потомка метод2 переопределен.
     Вызовется метод2 потомка */
     std::cout << ">> Testing calling methods with virtual\n";
-    Derived2 derived2;
-    derived2.method1();
+    {
+        Derived2 derived2;
+        derived2.method1();
+    }
     std::cout << "\n";
 
     /* В базовом классе объявить метод невиртуальный, а в классе-потомке
@@ -265,9 +278,11 @@ int main()
     std::cout << ">> Testing methods other 1\n";
     BaseNoVirtual* base_ptr3 = new Derived1;
     base_ptr3->method2();
+    delete base_ptr3;
     // Здесь будет вызываться метод потомка
     Derived1* der_ptr3 = new Derived1;
     der_ptr3->method2();
+    delete der_ptr3;
     std::cout << "\n";
 
     /* В базовом классе объявить метод виртуальный, а в классе-потомке
@@ -276,9 +291,11 @@ int main()
     std::cout << ">> Testing methods other 2\n";
     BaseVirtual* base_ptr4 = new Derived2;
     base_ptr4->method2();
+    delete base_ptr4;
     // Здесь тоже будет вызываться вызываться метод потомка
     Derived2* der_ptr4 = new Derived2;
     der_ptr4->method2();
+    delete der_ptr4;
     std::cout << "\n";
 
     /* Зачем нужны виртуальные методы? Зачем может понадобиться
@@ -286,9 +303,14 @@ int main()
     на класс-предок? Чтобы единообразно работать и с базовым,
     и с потомками */
     std::cout << ">> I don't even know how to call this section\n";
-    Planet* planets[3]{ new Planet, new GasGiant, new DeadAsteroid };
-    for (Planet* planet : planets) {
-        planet->mine();
+    {
+        Planet* planets[3]{ new Planet, new GasGiant, new DeadAsteroid };
+        for (Planet* planet : planets) {
+            planet->mine();
+        }
+        for (Planet* planet : planets) {
+            delete planet;
+        }
     }
     std::cout << "\n";
 
@@ -299,10 +321,14 @@ int main()
     потомках, проверить работу и показать, какие проблемы возникают при
     его использовании */
     std::cout << ">> Testing classname()\n";
-    Planet planet;
-    std::cout << planet.classname() << "\n";
-    GasGiant gas_giant;
-    std::cout << gas_giant.classname() << "\n";
+    {
+        Planet planet;
+        std::cout << planet.classname() << "\n";
+    }
+    {
+        GasGiant gas_giant;
+        std::cout << gas_giant.classname() << "\n";
+    }
     // Проблема в том, что каждому новому потомку надо прописывать
     // classname() вручную
     std::cout << "\n";
@@ -310,11 +336,13 @@ int main()
     /* Базовый виртуальный метод bool isA(string classname), перекрыть его
     в потомках и показать отличие от метода classname */
     std::cout << ">> Testing is_a()\n";
-    DeadAsteroid dead_asteroid;
-    std::cout << std::boolalpha;
-    std::cout << dead_asteroid.is_a("Planet") << "\n";
-    std::cout << dead_asteroid.is_a("GasGiant") << "\n";
-    std::cout << dead_asteroid.is_a("DeadAsteroid") << "\n";
+    {
+        DeadAsteroid dead_asteroid;
+        std::cout << std::boolalpha;
+        std::cout << dead_asteroid.is_a("Planet") << "\n";
+        std::cout << dead_asteroid.is_a("GasGiant") << "\n";
+        std::cout << dead_asteroid.is_a("DeadAsteroid") << "\n";
+    }
     // Проблема этого метода в том, что в него необходимо отправлять
     // все имена релевантных классов
     std::cout << "\n";
@@ -324,10 +352,15 @@ int main()
     который хранит указатели на разные классы-потомки. Тогда не у всех
     потомков может быть реализован какой-либо метод */
     std::cout << ">> Why do we need to check class?\n";
-    Planet* planets1[2]{ new GasGiant, new DeadAsteroid };
-    for (Planet* planet : planets1) {
-        if (planet->is_a("DeadAsteroid"))
-            std::cout << static_cast<DeadAsteroid*>(planet)->mined_out_date() << "\n";
+    {
+        Planet* planets1[2]{ new GasGiant, new DeadAsteroid };
+        for (Planet* planet : planets1) {
+            if (planet->is_a("DeadAsteroid"))
+                std::cout << static_cast<DeadAsteroid*>(planet)->mined_out_date() << "\n";
+        }
+        for (Planet* planet : planets1) {
+            delete planet;
+        }
     }
     std::cout << "\n";
 
@@ -335,14 +368,17 @@ int main()
     /* Продемонстрировать опасное приведение типов и предварительную
     проверку типа с помощью реализованного метода is_a */
     std::cout << ">> Testing static casting\n";
-    DeadAsteroid dead_asteroid1;
-    Planet* planet_ptr = &dead_asteroid1;
-    if (planet_ptr->is_a("DeadAsteroid")) {
-        DeadAsteroid* dc_res = static_cast<DeadAsteroid*>(planet_ptr);
-        std::cout << "Casting successful\n";
-    }
-    else {
-        std::cout << "Casting failed\n";
+    {
+        DeadAsteroid dead_asteroid1;
+        Planet* planet_ptr = &dead_asteroid1;
+        if (planet_ptr->is_a("DeadAsteroid")) {
+            DeadAsteroid* dc_res = static_cast<DeadAsteroid*>(planet_ptr);
+            std::cout << "Casting successful\n";
+        }
+        else {
+            std::cout << "Casting failed\n";
+        }
+        
     }
     std::cout << "\n";
 
@@ -357,43 +393,52 @@ int main()
     /* Продемонстрировать использование стандартных средств языка
     (dynamic_cast в c++ или аналог на используемом языке) */
     std::cout << ">> Testing dynamic casting\n";
-    Planet* planets3[2]{ new GasGiant, new DeadAsteroid };
-    for (Planet* planet : planets3) {
-        DeadAsteroid* dc_res = dynamic_cast<DeadAsteroid*>(planet);
-        if (dc_res) {
-            std::cout << dc_res->mined_out_date() << "\n";
+    {
+        Planet* planets3[2]{ new GasGiant, new DeadAsteroid };
+        for (Planet* planet : planets3) {
+            DeadAsteroid* dc_res = dynamic_cast<DeadAsteroid*>(planet);
+            if (dc_res) {
+                std::cout << dc_res->mined_out_date() << "\n";
+            }
+        }
+        for (Planet* planet : planets3) {
+            delete planet;
         }
     }
     std::cout << "\n";
 
     /* Передача объектов как параметров в функции */
     std::cout << ">> Testing using objects as parameters\n";
-    Animal animal;
-    std::cout << "----------\n";
-    std::cout << "func1(Animal obj):\n";
-    // Создаст копию, удалит ее по завершении работы функции
-    func1(animal);
-    std::cout << "----------\n";
-    std::cout << "func2(Animal* obj):\n";
-    // Примет либо адрес объекта, либо указатель
-    func2(&animal);
-    std::cout << "----------\n";
-    std::cout << "func3(Animal& obj):\n";
-    func3(animal);
+    {
+        Animal animal;
+        std::cout << "----------\n";
+        std::cout << "func1(Animal obj):\n";
+        // Создаст копию, удалит ее по завершении работы функции
+        func1(animal);
+        std::cout << "----------\n";
+        std::cout << "func2(Animal* obj):\n";
+        // Примет либо адрес объекта, либо указатель
+        func2(&animal);
+        std::cout << "----------\n";
+        std::cout << "func3(Animal& obj):\n";
+        func3(animal);
+    }
     std::cout << "++++++++++\n";
-    Cat cat;
-    std::cout << "----------\n";
-    std::cout << "func1(Animal obj):\n";
-    // Создаст копию, удалит ее по завершении работы функции.
-    // При этом обрежет у копии потомка все, чего нет у предка
-    func1(cat);
-    std::cout << "----------\n";
-    std::cout << "func2(Animal* obj):\n";
-    // Примет либо адрес объекта, либо указатель
-    func2(&cat);
-    std::cout << "----------\n";
-    std::cout << "func3(Animal& obj):\n";
-    func3(cat);
+    {
+        Cat cat;
+        std::cout << "----------\n";
+        std::cout << "func1(Animal obj):\n";
+        // Создаст копию, удалит ее по завершении работы функции.
+        // При этом обрежет у копии потомка все, чего нет у предка
+        func1(cat);
+        std::cout << "----------\n";
+        std::cout << "func2(Animal* obj):\n";
+        // Примет либо адрес объекта, либо указатель
+        func2(&cat);
+        std::cout << "----------\n";
+        std::cout << "func3(Animal& obj):\n";
+        func3(cat);
+    }
     std::cout << "\n";
 
     /* Можно ли внутри функции привести переданный Base к Desc с помощью
@@ -406,5 +451,30 @@ int main()
     // Но при этом в указатель можно отправить nullptr, тогда как ссылка
     // обязана на что-либо указывать
 
-    std::cout << "\n\n\n\n>> Cleaning up the mess\n";
+    /* Возвращение объектов как результата из функции */
+    std::cout << ">> Testing returning objects\n";
+    {   
+        // Объект возвращается нормально
+        Animal animal1{ function1() };
+        std::cout << "Outside function1\n";
+    }
+    std::cout << "----------\n";
+    {   
+        // Объект уничтожается еще до выхода из функции. Плохо
+        Animal* animal2{ function2() };
+        std::cout << "Outside function2\n";
+    }
+    std::cout << "----------\n";
+    {
+        // Объект уничтожается еще до выхода из функции. Плохо
+        Animal animal3{ function3() };
+        std::cout << "Outside function3\n";
+    }
+    std::cout << "----------\n";
+    {   
+        // Создается копия внутреннего объекта
+        Animal animal4{ function4() };
+        std::cout << "Outside function4\n";
+    }
+    std::cout << "\n";
 }
