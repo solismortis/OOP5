@@ -1,4 +1,3 @@
-// TODO: Check everything before submitting
 #include <format>
 #include <iostream>
 #include <iomanip>
@@ -260,8 +259,7 @@ int main()
     /* Виртуальные деструкторы нужны, когда мы в переменную или
     контейнер для указателей на предков кладем указатели на потомков.
     Тогда при удалении через такие указатели, если деструкторы у предков
-    не виртуальные, то
-    вызовутся только они */
+    не виртуальные, то вызовутся только они */
 
     // Вызовется только деструктор базового, так как не virtual
     std::cout << ">> Testing no virtual destructor\n";
@@ -356,7 +354,7 @@ int main()
     // classname() вручную
     std::cout << "\n";
 
-    /* Базовый виртуальный метод bool isA(string classname), перекрыть его
+    /* Базовый виртуальный метод bool is_a(string classname), перекрыть его
     в потомках и показать отличие от метода classname */
     std::cout << ">> Testing is_a()\n";
     {
@@ -542,6 +540,7 @@ int main()
     // При кол-ве указателей == 0 удаляет объект
     std::cout << ">> Testing shared_ptr\n";
     {
+        // Создаем копию shared_ptr
         std::shared_ptr<Animal> animal_shr_ptr1{ std::make_shared<Animal>() };
         std::shared_ptr<Animal> animal_shr_ptr2{ animal_shr_ptr1 };
         // Вывод кол-ва указателей на объект
